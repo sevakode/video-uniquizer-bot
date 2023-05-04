@@ -5,32 +5,34 @@ use FFMpeg\FFMpeg;
 use FFMpeg\Format\Video\X264;
 use Telegram\Bot\FileUpload\InputFile;
 
-function uniq_video($path,$imagePath, $flipStatus)
+function uniq_video($path,$flipStatus,$imagePath=null)
 {
     $output='output.mp4';
     $ffmpeg = FFMpeg::create();
 
     $video = $ffmpeg->open($path);
     // добавляем изображение
-    $image = $ffmpeg->open($imagePath);
+    if($imagePath) {
+        $image = $ffmpeg->open($imagePath);
 
-    $videoWidth = $video->getStreams()->videos()->first()->get('width');
-    $videoHeight = $video->getStreams()->videos()->first()->get('height');
+        $videoWidth = $video->getStreams()->videos()->first()->get('width');
+        $videoHeight = $video->getStreams()->videos()->first()->get('height');
 
-    $imageWidth = $image->getStreams()->videos()->first()->get('width');
-    $imageHeight = $image->getStreams()->videos()->first()->get('height');
+        $imageWidth = $image->getStreams()->videos()->first()->get('width');
+        $imageHeight = $image->getStreams()->videos()->first()->get('height');
 
-    // случайное смещение по X в пределах +/- 20% от середины видео
-    $offsetX = round($videoWidth * (rand(-20, 20) / 100));
-    $overlayX = ($videoWidth - $imageWidth) / 2 + $offsetX;
+        // случайное смещение по X в пределах +/- 20% от середины видео
+        $offsetX = round($videoWidth * (rand(-20, 20) / 100));
+        $overlayX = ($videoWidth - $imageWidth) / 2 + $offsetX;
 
-    $overlayY = $videoHeight - $imageHeight - 20; // отступ 20 пикселей от нижней границы
+        $overlayY = $videoHeight - $imageHeight - 20; // отступ 20 пикселей от нижней границы
 
-    $video->filters()->watermark($imagePath, array(
-        'position' => 'absolute',
-        'x' => $overlayX,
-        'y' => $overlayY,
-    ));
+        $video->filters()->watermark($imagePath, array(
+            'position' => 'absolute',
+            'x' => $overlayX,
+            'y' => $overlayY,
+        ));
+    }
 
 //Переменные
     $blur_radius = rand(0, 50);       // Радиус размытия
@@ -135,9 +137,12 @@ function process_video($telegram, $message, $flipStatus)
 //    create_video(1, 1, 0, 1, 0, 0);
     //минимум
 //    create_video(0.95, 0.95, 0.05, 0.95, -0.05, -0.6);
-    $imagePath = 'image.png';
-
-    $video=uniq_video($videoPath, $imagePath, $flipStatus);
+    if(env('WATERMARK')){
+        $imagePath = 'image.png';
+        $video=uniq_video($videoPath, $flipStatus, $imagePath );
+    }else{
+        $video=uniq_video($videoPath, $flipStatus );
+    }
     //Создание видео
     $archive_name = 'unique_video.zip';
     create_zip_archive($video, $archive_name);
