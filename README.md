@@ -22,7 +22,7 @@
 
 ```bash
 sudo apt-get update
-sudo apt-get install php7.4-cli php-zip
+sudo apt-get install php7.4 php-zip
 ```
 
 #### Для CentOS/RHEL:

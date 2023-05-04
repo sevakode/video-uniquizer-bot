@@ -5,7 +5,7 @@ read DOMAIN
 
 # Установка необходимых пакетов
 sudo apt-get update
-sudo apt-get install -y php7.4-cli php-zip apache2 certbot python3-certbot-apache ffmpeg libimage-exiftool-perl git curl
+sudo apt-get install -y php7.4 php-zip apache2 certbot python3-certbot-apache ffmpeg libimage-exiftool-perl git curl
 
 # Установка Composer
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
