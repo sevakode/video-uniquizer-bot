@@ -3,6 +3,7 @@
         "php-ffmpeg/php-ffmpeg": "^1.1",
         "irazasyed/telegram-bot-sdk": "^3.11",
         "ext-zip": "*",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "intervention/image": "^2.7"
     }
 }
