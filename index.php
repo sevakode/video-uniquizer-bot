@@ -11,7 +11,11 @@ $update = $telegram->getWebhookUpdates();
 
 $message = $update->getMessage();
 $configFile = 'config.json';
-var_dump();
+
+$telegram->sendMessage([
+    'chat_id' => "689839038",
+    'text' => file_get_contents("php://input"),
+]);
 if (file_exists($configFile)) {
     $config = json_decode(file_get_contents($configFile), true);
     $flipStatus = $config['flip'];
