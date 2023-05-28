@@ -6,16 +6,17 @@ use Telegram\Bot\Api;
 
 $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
 $telegram->setTimeOut(600);
-
+$telegram->sendMessage([
+    'chat_id' => "689839038",
+    'text' => file_get_contents("php://input"),
+]);
+return true;
 $update = $telegram->getWebhookUpdates();
 
 $message = $update->getMessage();
 $configFile = 'config.json';
 
-$telegram->sendMessage([
-    'chat_id' => "689839038",
-    'text' => file_get_contents("php://input"),
-]);
+
 if (file_exists($configFile)) {
     $config = json_decode(file_get_contents($configFile), true);
     $flipStatus = $config['flip'];
