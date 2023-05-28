@@ -4,12 +4,14 @@ require 'config.php';
 require 'functions.php';
 use Telegram\Bot\Api;
 
-$telegram = new Api(env('API_KEY'));
+$telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
 $telegram->setTimeOut(600);
 
-$updates = $telegram->getUpdates();
-$message = $updates->getMessage();
+$update = $telegram->getWebhookUpdates();
+
+$message = $update->getMessage();
 $configFile = 'config.json';
+var_dump();
 if (file_exists($configFile)) {
     $config = json_decode(file_get_contents($configFile), true);
     $flipStatus = $config['flip'];
