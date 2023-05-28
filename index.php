@@ -6,11 +6,11 @@ use Telegram\Bot\Api;
 
 $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
 $telegram->setTimeOut(600);
-$telegram->sendMessage([
-    'chat_id' => "689839038",
-    'text' => file_get_contents("php://input"),
-]);
-return true;
+//$telegram->sendMessage([
+//    'chat_id' => "689839038",
+//    'text' => file_get_contents("php://input"),
+//]);
+//return true;
 $update = $telegram->getWebhookUpdates();
 
 $message = $update->getMessage();
