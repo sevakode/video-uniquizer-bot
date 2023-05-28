@@ -79,10 +79,13 @@ function uniq_video($path,$flipStatus,$imagePath=null)
     $filters = '';
 //    $filters .= "boxblur=enable='between(t,0,0.5)':luma_radius={$blur_radius},";
     $filters .= "rotate={$rotation}*PI/180,";
-    $filters .= "hflip,vflip,"; // Using both horizontal and vertical flip
+
+    $filters .= "hflip,vflip,";
+
     if ($flipStatus) {
         $filters .= "hflip,";
     }
+
     $filters .= "setpts={$speed}*PTS,";
     $filters .= "eq=contrast={$contrast}:brightness={$brightness},";
     $filters .= "noise=alls={$noise}:allf=t,";
@@ -95,16 +98,10 @@ function uniq_video($path,$flipStatus,$imagePath=null)
         ->setAudioKiloBitrate(128)
         ->setAdditionalParameters(['-preset', 'veryfast', '-tune', 'zerolatency']); // добавлены параметры для оптимизации
     $video->save($format, $output);
-    $pathOutput=metaRand($output);
-
-    if($pathOutput!=0){
-        return $pathOutput;
-    }
-    else{
-        return $output;
-    }
-
+    metaRand($output);
+    return $output;
 }
+
 function metaRand($path){
 // Список телефонов
     $phones = [
@@ -147,18 +144,11 @@ function metaRand($path){
     $exiftoolCommand = "exiftool -CreateDate='{$creationDate}' -ModifyDate='{$modifyDate}' -Make='{$make}' -Model='{$model}' -api quicktimeutc=1 -AudioBitrate='{$audio_bitrate}' -AudioChannels='{$audio_channels}' -AudioSampleRate='{$audio_sample_rate}' -VideoFrameRate='{$video_frame_rate}' -ImageWidth='{$image_width}' -ImageHeight='{$image_height}' {$path}";
 
 //    $exiftoolCommand = "exiftool -CreateDate='{$creationDate}' -ModifyDate='{$modifyDate}' -Make='{$make}' -Model='{$model}' -api quicktimeutc=1 output.mp4";
-    exec($exiftoolCommand, $output, $return_val);
+    exec($exiftoolCommand, $output);
 
-    if (file_exists('output.mp4_original')) {
-        unlink('output.mp4_original');
-    }
-    if($return_val!=0){
-        return $return_val;
-    }
-    else{
-        return $path;
-    }
+    unlink('output.mp4_original');
 }
+
 function randomDate($start_date, $end_date)
 {
     $min = strtotime($start_date);
@@ -168,6 +158,7 @@ function randomDate($start_date, $end_date)
 
     return date('Y:m:d H:i:s', $rand_time);
 }
+
 function create_zip_archive($source_file, $archive_name)
 {
     $zip = new ZipArchive();
@@ -178,12 +169,13 @@ function create_zip_archive($source_file, $archive_name)
     $zip->close();
     return true;
 }
+
 function process_video($telegram, $message, $flipStatus)
 {
     $video = $message->getVideo();
     $file = $telegram->getFile(['file_id' => $video->getFileId()]);
     $filePath = $file->getFilePath();
-    $downloadLink = "https://api.telegram.org/file/bot" . env('API_KEY') . "/{$filePath}";
+    $downloadLink = "https://api.telegram.org/file/bot" . env('TELEGRAM_BOT_TOKEN') . "/{$filePath}";
     $downloadPath='input.mp4';
     $fileContent = fopen($downloadLink, 'r');
     if ($fileContent === false) {
@@ -192,14 +184,10 @@ function process_video($telegram, $message, $flipStatus)
             'text' => "An error occurred: 'Failed to open file: ' . $downloadLink"
         ]);
     }
-
-    if (file_put_contents($downloadPath, $fileContent) === false) {
-        $telegram->sendMessage([
-            'chat_id' => $message->getChat()->getId(),
-            'text' => "An error occurred: 'Failed to save file: ' . $downloadPath"
-        ]);
-
+    else {
+        file_put_contents($downloadPath, stream_get_contents($fileContent));
     }
+
 
     //дефолт видео
 //    create_video(1, 1, 0, 1, 0, 0);
@@ -211,12 +199,6 @@ function process_video($telegram, $message, $flipStatus)
     }else{
         $video=uniq_video($downloadPath, $flipStatus );
     }
-    if ($video != 0) {
-        $telegram->sendMessage([
-            'chat_id' => $message->getChat()->getId(),
-            'text' => "An error occurred: 'Failed to modify metadata using exiftool'"
-        ]);
-    }
     //Создание видео
     $archive_name = 'unique_video.zip';
     create_zip_archive($video, $archive_name);
@@ -227,43 +209,8 @@ function process_video($telegram, $message, $flipStatus)
         'caption' => 'Вот ваше уникальное видео!',
         'parse_mode' => 'HTML',
     ]);
+
     unlink($downloadPath);
     unlink($video);
     unlink($archive_name);
-}
-function process_image($telegram, $message, $flipStatus){
-    $photo = $message->getPhoto();
-    $photo = end($photo);  // получаем наибольшее изображение
-    $file = $telegram->getFile(['file_id' => $photo->getFileId()]);
-    $filePath = $file->getFilePath();
-    $downloadLink = "https://api.telegram.org/file/bot" . env('API_KEY') . "/{$filePath}";
-    $downloadPath='input.jpg';
-    $fileContent = fopen($downloadLink, 'r');
-    if ($fileContent === false) {
-        $telegram->sendMessage([
-            'chat_id' => $message->getChat()->getId(),
-            'text' => "An error occurred: 'Failed to open file: ' . $downloadLink"
-        ]);
-    }
-
-    if (file_put_contents($downloadPath, $fileContent) === false) {
-        $telegram->sendMessage([
-            'chat_id' => $message->getChat()->getId(),
-            'text' => "An error occurred: 'Failed to save file: ' . $downloadPath"
-        ]);
-
-    }
-    $image = uniq_image($downloadPath, $flipStatus);
-    $telegram->sendPhoto([
-        'chat_id' => $message->getChat()->getId(),
-        'photo' => InputFile::create($image, basename($image)),
-        'caption' => 'Вот ваше уникальное изображение!',
-        'parse_mode' => 'HTML',
-    ]);
-    $archive_name = 'unique_image.zip';
-    create_zip_archive($image, $archive_name);
-    unlink($downloadPath);
-    unlink($image);
-    unlink($archive_name);
-
 }

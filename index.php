@@ -6,52 +6,50 @@ use Telegram\Bot\Api;
 
 $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
 $telegram->setTimeOut(600);
-//$telegram->sendMessage([
-//    'chat_id' => "689839038",
-//    'text' => file_get_contents("php://input"),
-//]);
-//return true;
-$update = $telegram->getWebhookUpdates();
 
-$message = $update->getMessage();
+$updates = $telegram->getUpdates();
 $configFile = 'config.json';
 
+foreach ($updates as $updateItem) {
+    $message = $updateItem->getMessage();
 
-if (file_exists($configFile)) {
-    $config = json_decode(file_get_contents($configFile), true);
-    $flipStatus = $config['flip'];
-} else {
-    $flipStatus = filter_var(env('FLIP_STATUS'), FILTER_VALIDATE_BOOLEAN);
-}
-if ($message->getText() == '/flip') {
 
-    $flipStatus = !$flipStatus;
-    $config['flip'] = $flipStatus;
-    file_put_contents($configFile, json_encode($config));
+    if (file_exists($configFile)) {
+        $config = json_decode(file_get_contents($configFile), true);
+        $flipStatus = $config['flip'];
+    } else {
+        $flipStatus = filter_var(env('FLIP_STATUS'), FILTER_VALIDATE_BOOLEAN);
+    }
+    if ($message->getText() == '/flip') {
 
-    $statusText = $flipStatus ? 'включено' : 'выключено';
-    $telegram->sendMessage([
-        'chat_id' => $message->getChat()->getId(),
-        'text' => 'Отзеркаливание ' . $statusText,
-    ]);
+        $flipStatus = !$flipStatus;
+        $config['flip'] = $flipStatus;
+        file_put_contents($configFile, json_encode($config));
 
-    return;
-}
+        $statusText = $flipStatus ? 'включено' : 'выключено';
+        $telegram->sendMessage([
+            'chat_id' => $message->getChat()->getId(),
+            'text' => 'Отзеркаливание ' . $statusText,
+        ]);
 
-$video = $message->getVideo();
-$photo = $message->getPhoto();
-if ($video !== null) {
-    process_video($telegram, $message, $flipStatus);
-    return;
+        return;
+    }
 
-}elseif($photo !== null) {
-    process_image($telegram, $message, $flipStatus);
-    return;
-}
-else {
-    $telegram->sendMessage([
-        'chat_id' => $message->getChat()->getId(),
-        'text' => 'Пожалуйста, отправьте мне видео или фото для уникализации.'
-    ]);
-    return;
+    $video = $message->getVideo();
+//    $photo = $message->getPhoto();
+    if ($video !== null) {
+        process_video($telegram, $message, $flipStatus);
+        return;
+    }
+//elseif($photo !== null) {
+//    process_image($telegram, $message, $flipStatus);
+//    return;
+//}
+    else {
+        $telegram->sendMessage([
+            'chat_id' => $message->getChat()->getId(),
+            'text' => 'Пожалуйста, отправьте мне видео или фото для уникализации.'
+        ]);
+        return;
+    }
 }
