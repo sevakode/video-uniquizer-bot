@@ -66,7 +66,7 @@ function uniq_video($path,$flipStatus,$imagePath=null)
     }
 
 //Переменные
-    $blur_radius = rand(0, 50);       // Радиус размытия
+//    $blur_radius = rand(0, 50);       // Радиус размытия
     $speed = rand(80, 113) / 100;       // изменение скорости на 20%
     $contrast = rand(85, 100) / 100;    // изменение контрастности на 15%
     $noise = rand(5, 70) / 100;         // добавление шумов на 5-70%
@@ -77,8 +77,9 @@ function uniq_video($path,$flipStatus,$imagePath=null)
 
 
     $filters = '';
-    $filters .= "boxblur=enable='between(t,0,0.5)':luma_radius={$blur_radius},";
+//    $filters .= "boxblur=enable='between(t,0,0.5)':luma_radius={$blur_radius},";
     $filters .= "rotate={$rotation}*PI/180,";
+    $filters .= "hflip,vflip,"; // Using both horizontal and vertical flip
     if ($flipStatus) {
         $filters .= "hflip,";
     }
