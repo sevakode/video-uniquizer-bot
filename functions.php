@@ -9,6 +9,7 @@ use Intervention\Image\ImageManagerStatic as Image;
 function uniq_video($path, $flipStatus, $imagePath = null)
 {
     $bashScript = "./uniq_video.sh";
+
     $output = shell_exec("bash $bashScript $path $flipStatus $imagePath");
 
     return $output;
@@ -67,7 +68,13 @@ function process_video($telegram, $message, $flipStatus)
     }
     //Создание видео
     $archive_name = 'unique_video.zip';
-    create_zip_archive($video, $archive_name);
+    echo "Archive name: " . $archive_name . "\n";
+
+    $archiveCreated = create_zip_archive($video, $archive_name);
+
+    if (!$archiveCreated) {
+        die("Could not create archive $archive_name");
+    }
     $telegram->sendDocument([
         'chat_id' => $message->getChat()->getId(),
         'document' => InputFile::create($archive_name, $archive_name),
