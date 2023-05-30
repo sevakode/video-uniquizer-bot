@@ -12,7 +12,7 @@ function uniq_video($path, $flipStatus, $imagePath = null)
 
     $output = shell_exec("bash $bashScript $path $flipStatus $imagePath");
 
-    return $output;
+    return "output.mp4";
 }
 
 
@@ -70,7 +70,6 @@ function process_video($telegram, $message, $flipStatus)
     }
     //Создание видео
     $archive_name = 'unique_video.zip';
-    echo "Archive name: " . $archive_name . "\n";
 
     $archiveCreated = create_zip_archive($video, $archive_name);
 
@@ -79,7 +78,7 @@ function process_video($telegram, $message, $flipStatus)
     }
     $telegram->sendDocument([
         'chat_id' => $message->getChat()->getId(),
-        'document' => InputFile::create($video, $archive_name),
+        'document' => InputFile::create($archive_name, $archive_name),
         'caption' => 'Вот ваше уникальное видео!',
         'parse_mode' => 'HTML',
     ]);
