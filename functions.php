@@ -32,7 +32,9 @@ function create_zip_archive($source_file, $archive_name)
     if ($zip->open($archive_name, ZipArchive::CREATE) !== true) {
         return false;
     }
-    $zip->addFile($source_file, basename($source_file));
+    if ($zip->addFile($source_file, basename($source_file)) !== true) {
+        return false;
+    }
     $zip->close();
     return true;
 }
