@@ -32,7 +32,7 @@ function create_zip_archive($source_file, $archive_name)
     if ($zip->open($archive_name, ZipArchive::CREATE) !== true) {
         return false;
     }
-    if ($zip->addFile($source_file, basename($source_file)) !== true) {
+    if ($zip->addFile($source_file) !== true) {
         return false;
     }
     $zip->close();
@@ -79,7 +79,7 @@ function process_video($telegram, $message, $flipStatus)
     }
     $telegram->sendDocument([
         'chat_id' => $message->getChat()->getId(),
-        'document' => InputFile::create($archive_name, $archive_name),
+        'document' => InputFile::create($video, $archive_name),
         'caption' => 'Вот ваше уникальное видео!',
         'parse_mode' => 'HTML',
     ]);
