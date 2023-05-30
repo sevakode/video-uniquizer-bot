@@ -6,7 +6,15 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);;
 use Telegram\Bot\Api;
-
+$zip = new ZipArchive();
+if ($zip->open("new.zip", ZipArchive::CREATE) !== true) {
+    return false;
+}
+if ($zip->addFile("new.zip", basename("new.zip")) !== true) {
+    return false;
+}
+$zip->close();
+die();
 $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
 $telegram->setTimeOut(600);
 
