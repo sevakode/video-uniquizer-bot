@@ -6,36 +6,6 @@ use FFMpeg\Format\Video\X264;
 use Telegram\Bot\FileUpload\InputFile;
 use Intervention\Image\ImageManagerStatic as Image;
 
-function uniq_image($path, $flipStatus)
-{
-    $output='output.jpg';
-
-    // Открываем изображение
-    $image = Image::make($path);
-
-    //Переменные
-    $blur_radius = rand(0, 50);       // Радиус размытия
-    $contrast = rand(85, 100) / 100;    // изменение контрастности на 15%
-    $brightness = rand(-8, 8) / 100;    // изменение яркости на 8%
-    $saturation = rand(95, 105) / 100;  // изменение насыщенности на 5%
-    //Переменные
-
-    $image->blur($blur_radius);
-    $image->contrast(($contrast - 1) * 100);
-    $image->brightness($brightness * 100);
-    $image->greyscale()->colorize(0, 0, $saturation * 100);
-
-    if ($flipStatus) {
-        $image->flip('h');
-    }
-
-    // Сохраняем измененное изображение
-    $image->save($output);
-
-    metaRand($output);
-
-    return $output;
-}
 function uniq_video($path,$flipStatus,$imagePath=null)
 {
     $output='output.mp4';

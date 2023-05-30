@@ -7,7 +7,7 @@ use Telegram\Bot\Api;
 $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
 $telegram->setTimeOut(600);
 
-$updates = $telegram->getUpdates();
+$updates = $telegram->getWebhookUpdates();
 $configFile = 'config.json';
 
 foreach ($updates as $updateItem) {
@@ -41,14 +41,11 @@ foreach ($updates as $updateItem) {
         process_video($telegram, $message, $flipStatus);
         return;
     }
-//elseif($photo !== null) {
-//    process_image($telegram, $message, $flipStatus);
-//    return;
-//}
+
     else {
         $telegram->sendMessage([
             'chat_id' => $message->getChat()->getId(),
-            'text' => 'Пожалуйста, отправьте мне видео или фото для уникализации.'
+            'text' => 'Пожалуйста, отправьте мне видео для уникализации.'
         ]);
         return;
     }
